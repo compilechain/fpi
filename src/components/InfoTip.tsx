@@ -1,4 +1,3 @@
-import React from "react";
 
 export function InfoTip({ text }: { text: string }) {
   return (
