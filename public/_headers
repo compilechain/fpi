@@ -1,2 +1,3 @@
 /*
+  ! X-Frame-Options
   Content-Security-Policy: frame-ancestors 'self' https://www.tec-centric.tech https://tec-centric.tech https://app.tec-centric.tech;
