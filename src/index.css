@@ -3,6 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Keep your dark aesthetic */
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -13,6 +14,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Links */
 a {
   font-weight: 500;
   color: #646cff;
@@ -22,19 +24,19 @@ a:hover {
   color: #535bf2;
 }
 
+/* IMPORTANT: remove flex-centering which causes “corner gap” / centered app */
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
+/* Let App.css control layout, not global h1 */
 h1 {
-  font-size: 3.2em;
   line-height: 1.1;
 }
 
+/* Buttons (keep your defaults) */
 button {
   border-radius: 8px;
   border: 1px solid transparent;

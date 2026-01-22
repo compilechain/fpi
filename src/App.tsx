@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import InfoTip from "./components/InfoTip";
 import TruckSlider from "./components/TruckSlider";
@@ -44,6 +44,14 @@ export default function App() {
 
   const delta = useMemo(() => target - baseline, [target, baseline]);
 
+  // Quiet reminder for you (not visible to client)
+  useEffect(() => {
+    if (!isEmbed) {
+      console.info("[FPI] Embed mode available: add ?embed=1 for a clean embedded view.");
+      console.info("[FPI] Basis override supported in URL: ?basis=12000 (only if backend accepts).");
+    }
+  }, [isEmbed]);
+
   async function run() {
     setBusy(true);
     setErr(null);
@@ -51,7 +59,7 @@ export default function App() {
 
     try {
       const endpoint = mode === "demo" ? "demo-run" : "run";
-      const token = window.__NEEV_ACCESS_TOKEN; // optional: app injects token
+      const token = window.__NEEV_ACCESS_TOKEN;
 
       const payload: {
         tenant_key: string;
@@ -66,7 +74,6 @@ export default function App() {
         target_index: target,
       };
 
-      // Only include if it’s a valid number
       if (typeof basis === "number" && Number.isFinite(basis)) {
         payload.impact_basis = basis;
       }
@@ -130,7 +137,7 @@ export default function App() {
               Predict savings from operational uplift — <span className="grad">in seconds</span>.
             </h1>
             <p>
-              A Fleet profitability calculator today. The foundation for a full predictive engine (benchmarks, driver behavior, maintenance,
+              A fleet profitability calculator today. The foundation for a full predictive engine (benchmarks, driver behavior, maintenance,
               energy, claims) tomorrow.
             </p>
             <div className="pillRow">
@@ -166,9 +173,8 @@ export default function App() {
 
         <section className="grid">
           <div className="glass card">
-            <div className="cardTitle">
-              Inputs <span className="muted">( ⓘ for explanations)</span>
-            </div>
+            <div className="cardTitle">Inputs</div>
+            <div className="cardSub muted">Hover ⓘ for definitions</div>
 
             <div className="fieldRow">
               <label>
@@ -180,8 +186,7 @@ export default function App() {
 
             <div className="fieldRow">
               <label>
-                Fleet Size{" "}
-                <InfoTip text="Number of active vehicles in the fleet segment you’re targeting." />
+                Fleet Size <InfoTip text="Number of active vehicles in the fleet segment you’re targeting." />
               </label>
               <TruckSlider value={fleetSize} onChange={setFleetSize} min={1} max={500} />
             </div>
@@ -189,16 +194,14 @@ export default function App() {
             <div className="twoCol">
               <div className="fieldRow">
                 <label>
-                  Baseline Index{" "}
-                  <InfoTip text="Current operational state (0–100). Use your current FPI score." />
+                  Baseline Index <InfoTip text="Current operational state (0–100). Use your current FPI score." />
                 </label>
                 <input type="number" min={0} max={100} value={baseline} onChange={(e) => setBaseline(Number(e.target.value))} />
               </div>
 
               <div className="fieldRow">
                 <label>
-                  Target Index{" "}
-                  <InfoTip text="Expected post-intervention index (0–100). Target after training + process + tech adoption." />
+                  Target Index <InfoTip text="Expected post-intervention index (0–100). Target after training + process + tech adoption." />
                 </label>
                 <input type="number" min={0} max={100} value={target} onChange={(e) => setTarget(Number(e.target.value))} />
               </div>
@@ -239,13 +242,7 @@ export default function App() {
                 </div>
 
                 <div className="embedNote">
-                  Tip: embed cleanly with <span className="mono">?embed=1</span>
-                  {typeof basis === "number" && Number.isFinite(basis) && (
-                    <>
-                      {" "}
-                      • basis override: <span className="mono">?basis={basis}</span>
-                    </>
-                  )}
+                  Audit-safe output: every run generates a unique <span className="mono">Run ID</span> for traceability.
                 </div>
               </>
             )}

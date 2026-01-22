@@ -20,7 +20,6 @@ export default function InfoTip({ text }: { text: string }) {
   useLayoutEffect(() => {
     if (!open) return;
     computePos();
-    // reposition on next paint too (fonts/layout settling)
     const id = requestAnimationFrame(computePos);
     return () => cancelAnimationFrame(id);
   }, [open]);
