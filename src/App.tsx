@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import InfoTip from "./components/InfoTip";
+import tctLogo from "./assets/tec-centric-logo.png";
 import TruckSlider from "./components/TruckSlider";
 
 type ApiResp = {
@@ -27,8 +28,6 @@ export default function App() {
   const qs = new URLSearchParams(window.location.search);
   const isEmbed = qs.get("embed") === "1";
 
-  // Optional: allow override of impact basis via URL: ?basis=12000
-  // This does NOTHING unless your backend accepts it.
   const basisParam = qs.get("basis");
   const basis = basisParam ? Number(basisParam) : undefined;
 
@@ -116,17 +115,28 @@ export default function App() {
     <div className="neo-bg">
       {!isEmbed && (
         <header className="neo-header">
-          <div className="brand">
-            <div className="brandMark" />
+          <a className="brand brandLink" href="https://www.tec-centric.tech" target="_blank" rel="noreferrer">
+            <div className="brandLogo" aria-hidden="true">
+  <img className="brandLogoImg" src={tctLogo} alt="Tec-Centric Technologies" />
+</div>
+
             <div>
               <div className="brandTitle">Fleet Performance Index</div>
               <div className="brandSub">Neev • Predictive Model Calculator (v1)</div>
             </div>
-          </div>
-
-          <a className="cta" href="https://www.tec-centric.tech/contact" target="_blank" rel="noreferrer">
-            Talk to Us
           </a>
+
+          <div className="hdrLinks">
+            <a className="miniLink" href="https://passport.tec-centric.tech/admin" target="_blank" rel="noreferrer">
+              Passport
+            </a>
+            <a className="miniLink" href="https://verify.tec-centric.tech" target="_blank" rel="noreferrer">
+              Verify
+            </a>
+            <a className="cta" href="https://www.tec-centric.tech/contact" target="_blank" rel="noreferrer">
+              Talk to Us
+            </a>
+          </div>
         </header>
       )}
 
@@ -156,15 +166,13 @@ export default function App() {
           <div className="heroRight">
             <div className="metric">
               <div className="metricLabel">
-                Delta (Target − Baseline){" "}
-                <InfoTip text="The uplift you expect from process + training + tech. Higher delta increases projected savings." />
+                Delta (Target − Baseline) <InfoTip text="The uplift you expect from process + training + tech. Higher delta increases projected savings." />
               </div>
               <div className="metricVal">{delta}</div>
             </div>
             <div className="metric">
               <div className="metricLabel">
-                Confidence{" "}
-                <InfoTip text="v1 uses a deterministic confidence placeholder. Later it will be model-driven (data + variance + segments)." />
+                Confidence <InfoTip text="v1 uses a deterministic confidence placeholder. Later it will be model-driven (data + variance + segments)." />
               </div>
               <div className="metricVal">{resp ? resp.confidence : "—"}</div>
             </div>
@@ -178,8 +186,7 @@ export default function App() {
 
             <div className="fieldRow">
               <label>
-                Tenant Key{" "}
-                <InfoTip text="For now, tenant_key is required. In Phase 2, this will be inferred from JWT claims (tenant isolation)." />
+                Tenant Key <InfoTip text="For now, tenant_key is required. In Phase 2, this will be inferred from JWT claims (tenant isolation)." />
               </label>
               <input value={tenantKey} onChange={(e) => setTenantKey(e.target.value)} placeholder="demo" />
             </div>
