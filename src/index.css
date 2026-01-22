@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
 }
 
-/* Keep links sane; your App.css can override if needed */
+/* Keep links sane; App.css can override if needed */
 a {
   text-decoration: inherit;
 }
@@ -23,7 +23,4 @@ a {
 /* Keep button defaults minimal; App.css already styles your pills/run button */
 button {
   font-family: inherit;
-}
-.neo-bg {
-  color-scheme: dark;
 }
