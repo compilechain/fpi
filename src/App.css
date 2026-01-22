@@ -1,196 +1,37 @@
-.neo-bg {
-  min-height: 100vh;
-  background:
-    radial-gradient(1200px 700px at 15% 10%, rgba(66, 133, 244, 0.22), transparent 60%),
-    radial-gradient(900px 600px at 85% 20%, rgba(168, 85, 247, 0.22), transparent 55%),
-    radial-gradient(900px 600px at 55% 90%, rgba(34, 197, 94, 0.16), transparent 60%),
-    #070A12;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.neo-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(7, 10, 18, 0.55);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.brand { display: flex; gap: 12px; align-items: center; }
-.brandMark {
-  width: 38px; height: 38px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(99,102,241,.9), rgba(168,85,247,.9));
-  box-shadow: 0 0 28px rgba(168, 85, 247, 0.22);
-}
-.brandTitle { font-weight: 700; letter-spacing: 0.2px; }
-.brandSub { font-size: 12px; opacity: 0.7; margin-top: 2px; }
-
-.cta {
-  text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.cta:hover { transform: translateY(-1px); box-shadow: 0 0 22px rgba(99,102,241,.22); }
-
-.neo-wrap { max-width: 1100px; margin: 0 auto; padding: 18px 18px 30px; }
-
-.glass {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-  backdrop-filter: blur(14px);
-  border-radius: 18px;
-}
-
-.hero { display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; padding: 18px; }
-.hero h1 { margin: 0; font-size: 28px; line-height: 1.15; }
-.hero p { margin: 10px 0 0; opacity: .78; }
-.grad {
-  background: linear-gradient(90deg, rgba(99,102,241,.95), rgba(168,85,247,.95), rgba(34,197,94,.85));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.pillRow { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.pill {
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.86);
-  cursor: pointer;
-}
-.pill.on {
-  background: rgba(99,102,241,0.22);
-  border-color: rgba(99,102,241,0.45);
-  box-shadow: 0 0 18px rgba(99,102,241,0.16);
-}
-
-.metric { padding: 12px; border-radius: 14px; background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.08); }
-.metric + .metric { margin-top: 12px; }
-.metricLabel { font-size: 12px; opacity: 0.75; display: flex; gap: 8px; align-items: center; }
-.metricVal { font-size: 26px; font-weight: 800; margin-top: 6px; }
-
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
-.card { padding: 18px; }
-.cardTitle { font-weight: 700; margin-bottom: 14px; }
-.muted { opacity: .65; font-size: 12px; }
-
-.fieldRow { display: grid; gap: 6px; margin-bottom: 12px; }
-.fieldRow label { display: flex; gap: 8px; align-items: center; font-size: 13px; opacity: .85; }
-
-input {
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.18);
-  color: rgba(255,255,255,0.92);
-  outline: none;
-}
-input:focus { border-color: rgba(99,102,241,0.55); box-shadow: 0 0 18px rgba(99,102,241,0.15); }
-
-.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-.runBtn {
-  width: 100%;
-  margin-top: 6px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: linear-gradient(135deg, rgba(99,102,241,.30), rgba(168,85,247,.18));
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.runBtn:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(168,85,247,0.18); }
-.runBtn:disabled { opacity: .6; cursor: not-allowed; }
-
-.error {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(239,68,68,0.12);
-  border: 1px solid rgba(239,68,68,0.28);
-  color: rgba(255,255,255,0.92);
-}
-
-.empty { opacity: .75; padding: 14px; border-radius: 14px; background: rgba(0,0,0,0.16); border: 1px dashed rgba(255,255,255,0.12); }
-
-.kpiRow { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.kpi { padding: 12px; border-radius: 14px; background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.08); }
-.kpiLabel { font-size: 12px; opacity: .75; }
-.kpiVal { font-size: 20px; font-weight: 800; margin-top: 6px; word-break: break-word; }
-
-.explain { margin-top: 12px; padding: 12px; border-radius: 14px; background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.08); }
-.explainTitle { font-weight: 700; margin-bottom: 8px; }
-.explain ul { margin: 0; padding-left: 18px; opacity: .9; }
-.explain li { margin: 6px 0; }
-
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-.embedNote { margin-top: 10px; opacity: .65; font-size: 12px; }
-
-.neo-footer { margin-top: 18px; padding: 14px; text-align: center; }
-
-.infoTip {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  cursor: help;
+/* Truck slider: make the track itself draggable (no separate visible slider) */
+.truckTrackWrap {
   position: relative;
-  transition: box-shadow .15s ease, transform .15s ease;
-}
-.infoTip:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 18px rgba(99,102,241,0.18);
-}
-.tipBubble {
-  position: absolute;
-  top: 26px;
-  left: 0;
-  width: min(320px, 70vw);
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(10,12,20,0.95);
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-  font-size: 12px;
-  line-height: 1.35;
-  z-index: 50;
+  width: 100%;
 }
 
-.truckSlider { display: grid; gap: 10px; }
 .truckTrack {
   position: relative;
-  height: 12px;
+  height: 28px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
+
 .truckFill {
   height: 100%;
-  background: linear-gradient(90deg, rgba(99,102,241,.55), rgba(168,85,247,.35));
+  background: rgba(255, 255, 255, 0.35);
 }
+
 .truckIcon {
   position: absolute;
-  top: -10px;
-  font-size: 22px;
-  filter: drop-shadow(0 0 10px rgba(99,102,241,0.25));
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* important: input gets the drag */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
 }
-.range { width: 100%; }
-.truckMeta { display: flex; justify-content: space-between; opacity: .75; font-size: 12px; }
+
+/* Invisible range control overlayed on top of the truck track */
+.rangeOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 28px;
+  opacity: 0; /* hides it */
+  cursor: pointer;
+}

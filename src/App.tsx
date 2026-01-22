@@ -17,9 +17,20 @@ type ApiResp = {
 
 const API_BASE = "https://api.tec-centric.tech/v1/fpi";
 
+declare global {
+  interface Window {
+    __NEEV_ACCESS_TOKEN?: string;
+  }
+}
+
 export default function App() {
   const qs = new URLSearchParams(window.location.search);
   const isEmbed = qs.get("embed") === "1";
+
+  // Optional: allow override of impact basis via URL: ?basis=12000
+  // This does NOTHING unless your backend accepts it.
+  const basisParam = qs.get("basis");
+  const basis = basisParam ? Number(basisParam) : undefined;
 
   const [mode, setMode] = useState<"demo" | "secure">("demo");
   const [tenantKey, setTenantKey] = useState("demo");
@@ -40,18 +51,30 @@ export default function App() {
 
     try {
       const endpoint = mode === "demo" ? "demo-run" : "run";
-      const token = (window as any).__NEEV_ACCESS_TOKEN as string | undefined; // optional: app injects token
+      const token = window.__NEEV_ACCESS_TOKEN; // optional: app injects token
 
-      const payload: any = {
+      const payload: {
+        tenant_key: string;
+        fleet_size: number;
+        baseline_index: number;
+        target_index: number;
+        impact_basis?: number;
+      } = {
         tenant_key: tenantKey,
         fleet_size: fleetSize,
         baseline_index: baseline,
         target_index: target,
       };
 
+      // Only include if it’s a valid number
+      if (typeof basis === "number" && Number.isFinite(basis)) {
+        payload.impact_basis = basis;
+      }
+
       const headers: Record<string, string> = {
         "content-type": "application/json",
       };
+
       if (mode === "secure") {
         if (!token) {
           throw new Error(
@@ -67,13 +90,16 @@ export default function App() {
         body: JSON.stringify(payload),
       });
 
-      const data = await r.json().catch(() => ({}));
+      const data: unknown = await r.json().catch(() => ({}));
       if (!r.ok) {
-        throw new Error(data?.error || data?.message || `Request failed (${r.status})`);
+        const d = data as { error?: string; message?: string };
+        throw new Error(d?.error || d?.message || `Request failed (${r.status})`);
       }
+
       setResp(data as ApiResp);
-    } catch (e: any) {
-      setErr(String(e?.message ?? e));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setErr(msg);
     } finally {
       setBusy(false);
     }
@@ -104,7 +130,7 @@ export default function App() {
               Predict savings from operational uplift — <span className="grad">in seconds</span>.
             </h1>
             <p>
-              A demo-safe calculator today. The foundation for a full predictive engine (benchmarks, driver behavior, maintenance,
+              A Fleet profitability calculator today. The foundation for a full predictive engine (benchmarks, driver behavior, maintenance,
               energy, claims) tomorrow.
             </p>
             <div className="pillRow">
@@ -141,7 +167,7 @@ export default function App() {
         <section className="grid">
           <div className="glass card">
             <div className="cardTitle">
-              Inputs <span className="muted">(hover ⓘ for explanations)</span>
+              Inputs <span className="muted">( ⓘ for explanations)</span>
             </div>
 
             <div className="fieldRow">
@@ -157,7 +183,7 @@ export default function App() {
                 Fleet Size{" "}
                 <InfoTip text="Number of active vehicles in the fleet segment you’re targeting." />
               </label>
-              <TruckSlider value={fleetSize} onChange={setFleetSize} min={1} max={250} />
+              <TruckSlider value={fleetSize} onChange={setFleetSize} min={1} max={500} />
             </div>
 
             <div className="twoCol">
@@ -166,13 +192,7 @@ export default function App() {
                   Baseline Index{" "}
                   <InfoTip text="Current operational state (0–100). Use your current FPI score." />
                 </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={baseline}
-                  onChange={(e) => setBaseline(Number(e.target.value))}
-                />
+                <input type="number" min={0} max={100} value={baseline} onChange={(e) => setBaseline(Number(e.target.value))} />
               </div>
 
               <div className="fieldRow">
@@ -180,13 +200,7 @@ export default function App() {
                   Target Index{" "}
                   <InfoTip text="Expected post-intervention index (0–100). Target after training + process + tech adoption." />
                 </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={target}
-                  onChange={(e) => setTarget(Number(e.target.value))}
-                />
+                <input type="number" min={0} max={100} value={target} onChange={(e) => setTarget(Number(e.target.value))} />
               </div>
             </div>
 
@@ -201,9 +215,7 @@ export default function App() {
             <div className="cardTitle">Outputs</div>
 
             {!resp ? (
-              <div className="empty">
-                Run a calculation to see projected savings, explainability, and the audit-safe run ID.
-              </div>
+              <div className="empty">Run a calculation to see projected savings, explainability, and the audit-safe run ID.</div>
             ) : (
               <>
                 <div className="kpiRow">
@@ -228,6 +240,12 @@ export default function App() {
 
                 <div className="embedNote">
                   Tip: embed cleanly with <span className="mono">?embed=1</span>
+                  {typeof basis === "number" && Number.isFinite(basis) && (
+                    <>
+                      {" "}
+                      • basis override: <span className="mono">?basis={basis}</span>
+                    </>
+                  )}
                 </div>
               </>
             )}
