@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import InfoTip from "./components/InfoTip";
 import tctLogo from "./assets/tec-centric-logo.png";
+import ValueProposition from "./components/ValueProposition";
 import TruckSlider from "./components/TruckSlider";
 
 type ApiResp = {
@@ -201,14 +202,14 @@ export default function App() {
             <div className="twoCol">
               <div className="fieldRow">
                 <label>
-                  Baseline Index <InfoTip text="Current operational state (0–100). Use your current FPI score." />
+                  Baseline FPI <InfoTip text="Current operational state (0–100). Use your current FPI score." />
                 </label>
                 <input type="number" min={0} max={100} value={baseline} onChange={(e) => setBaseline(Number(e.target.value))} />
               </div>
 
               <div className="fieldRow">
                 <label>
-                  Target Index <InfoTip text="Expected post-intervention index (0–100). Target after training + process + tech adoption." />
+                  Target FPI <InfoTip text="Expected post-intervention index (0–100). Target after training + process + tech adoption." />
                 </label>
                 <input type="number" min={0} max={100} value={target} onChange={(e) => setTarget(Number(e.target.value))} />
               </div>
@@ -249,8 +250,12 @@ export default function App() {
                 </div>
 
                 <div className="embedNote">
+                
                   Audit-safe output: every run generates a unique <span className="mono">Run ID</span> for traceability.
+
                 </div>
+                <ValueProposition fleetSize={fleetSize} defaultCurrency="RM" />
+
               </>
             )}
           </div>
