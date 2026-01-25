@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import InfoTip from "./components/InfoTip";
 import tctLogo from "./assets/tec-centric-logo.png";
-import ValueProposition from "./components/ValueProposition";
 import TruckSlider from "./components/TruckSlider";
+import ValueProposition from "./components/ValueProposition";
 
 type ApiResp = {
   run_id: string;
@@ -25,6 +25,8 @@ declare global {
   }
 }
 
+type CurrencyCode = "RM" | "USD" | "AED" | "SAR";
+
 export default function App() {
   const qs = new URLSearchParams(window.location.search);
   const isEmbed = qs.get("embed") === "1";
@@ -38,17 +40,43 @@ export default function App() {
   const [baseline, setBaseline] = useState(62);
   const [target, setTarget] = useState(78);
 
+  // Revenue assumption (editable when customer gives real data)
+  const [revPerVehicleYear, setRevPerVehicleYear] = useState<number>(1_000_000);
+
+  // KPI toggle
+  const [revPeriod, setRevPeriod] = useState<"annual" | "monthly">("annual");
+
+  // Currency (will become real once backend FX endpoint is added)
+  const [currency, setCurrency] = useState<CurrencyCode>("RM");
+
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [resp, setResp] = useState<ApiResp | null>(null);
 
   const delta = useMemo(() => target - baseline, [target, baseline]);
 
-  // Quiet reminder for you (not visible to client)
+  // Client-side Added Revenue KPI (until backend returns Choice 2 explainability for it)
+  const addedRevenueAnnual = useMemo(() => {
+    const f = Number(fleetSize) || 0;
+    const rev = Number(revPerVehicleYear) || 0;
+    const d = Number(delta) || 0;
+    return f * rev * (d / 100);
+  }, [fleetSize, revPerVehicleYear, delta]);
+
+  const addedRevenue = revPeriod === "annual" ? addedRevenueAnnual : addedRevenueAnnual / 12;
+
+  function fmtMoney(n: number, code: CurrencyCode) {
+    const safe = Number.isFinite(n) ? n : 0;
+    // NOTE: until backend FX exists, we do not convert — we display in selected currency.
+    // Once FX endpoint is ready, we’ll multiply by fxRate here.
+    return `${code} ${Math.round(safe).toLocaleString()}`;
+  }
+
   useEffect(() => {
     if (!isEmbed) {
       console.info("[FPI] Embed mode available: add ?embed=1 for a clean embedded view.");
       console.info("[FPI] Basis override supported in URL: ?basis=12000 (only if backend accepts).");
+      console.info("[FPI] Currency currently display-only; will become real once /v1/fx/latest is live.");
     }
   }, [isEmbed]);
 
@@ -67,6 +95,7 @@ export default function App() {
         baseline_index: number;
         target_index: number;
         impact_basis?: number;
+        // future: revenue_per_vehicle_year?: number;
       } = {
         tenant_key: tenantKey,
         fleet_size: fleetSize,
@@ -118,8 +147,8 @@ export default function App() {
         <header className="neo-header">
           <a className="brand brandLink" href="https://www.tec-centric.tech" target="_blank" rel="noreferrer">
             <div className="brandLogo" aria-hidden="true">
-  <img className="brandLogoImg" src={tctLogo} alt="Tec-Centric Technologies" />
-</div>
+              <img className="brandLogoImg" src={tctLogo} alt="Tec-Centric Technologies" />
+            </div>
 
             <div>
               <div className="brandTitle">Fleet Performance Index</div>
@@ -167,13 +196,15 @@ export default function App() {
           <div className="heroRight">
             <div className="metric">
               <div className="metricLabel">
-                Delta (Target − Baseline) <InfoTip text="The uplift you expect from process + training + tech. Higher delta increases projected savings." />
+                Delta (Target − Baseline){" "}
+                <InfoTip text="The uplift you expect from process + training + tech. Higher delta increases projected impact." />
               </div>
               <div className="metricVal">{delta}</div>
             </div>
             <div className="metric">
               <div className="metricLabel">
-                Confidence <InfoTip text="v1 uses a deterministic confidence placeholder. Later it will be model-driven (data + variance + segments)." />
+                Confidence{" "}
+                <InfoTip text="v1 uses a deterministic confidence placeholder. Later it will be model-driven (data + variance + segments)." />
               </div>
               <div className="metricVal">{resp ? resp.confidence : "—"}</div>
             </div>
@@ -187,7 +218,8 @@ export default function App() {
 
             <div className="fieldRow">
               <label>
-                Tenant Key <InfoTip text="For now, tenant_key is required. In Phase 2, this will be inferred from JWT claims (tenant isolation)." />
+                Tenant Key{" "}
+                <InfoTip text="For now, tenant_key is required. In Phase 2, this will be inferred from JWT claims (tenant isolation)." />
               </label>
               <input value={tenantKey} onChange={(e) => setTenantKey(e.target.value)} placeholder="demo" />
             </div>
@@ -215,6 +247,22 @@ export default function App() {
               </div>
             </div>
 
+            <details className="assumpDetails">
+              <summary className="assumpSummary">Revenue assumption</summary>
+              <div className="fieldRow" style={{ marginTop: 10 }}>
+                <label>
+                  Revenue / vehicle / year{" "}
+                  <InfoTip text="Default RM 1,000,000. Update when customer provides servicing history, invoices, utilization, and telematics." />
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={revPerVehicleYear}
+                  onChange={(e) => setRevPerVehicleYear(Number(e.target.value))}
+                />
+              </div>
+            </details>
+
             <button className="runBtn" onClick={run} disabled={busy}>
               {busy ? "Running…" : "Calculate FPI Impact →"}
             </button>
@@ -226,14 +274,44 @@ export default function App() {
             <div className="cardTitle">Outputs</div>
 
             {!resp ? (
-              <div className="empty">Run a calculation to see projected savings, explainability, and the audit-safe run ID.</div>
+              <div className="empty">Run a calculation to see projected impact, explainability, and the audit-safe run ID.</div>
             ) : (
               <>
                 <div className="kpiRow">
                   <div className="kpi">
-                    <div className="kpiLabel">Projected Monthly Savings</div>
-                    <div className="kpiVal">RM {resp.projected_monthly_savings.toLocaleString()}</div>
+                    <div className="kpiLabel kpiLabelRow">
+                      <span>
+                        Projected Added Revenue{" "}
+                        <InfoTip text="Currently computed in the frontend using the Revenue/vehicle/year assumption. In Phase 2, backend will return this KPI + assumptions + explainability (Choice 2)." />
+                      </span>
+
+                      <div className="kpiToggles">
+                        <button className={`pill miniPill ${revPeriod === "annual" ? "on" : ""}`} onClick={() => setRevPeriod("annual")} type="button">
+                          Annual
+                        </button>
+                        <button className={`pill miniPill ${revPeriod === "monthly" ? "on" : ""}`} onClick={() => setRevPeriod("monthly")} type="button">
+                          Monthly
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="kpiVal">{fmtMoney(addedRevenue, currency)}</div>
+
+                    <div className="kpiMetaRow">
+                      <div className="kpiMeta">
+                        Assumption: <span className="mono">rev/veh/yr = {currency} {Math.round(revPerVehicleYear).toLocaleString()}</span>
+                      </div>
+                      <div className="kpiCurrency">
+                        <select className="vpSelect" value={currency} onChange={(e) => setCurrency(e.target.value as CurrencyCode)}>
+                          <option value="RM">RM</option>
+                          <option value="USD">USD</option>
+                          <option value="AED">AED</option>
+                          <option value="SAR">SAR</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
+
                   <div className="kpi">
                     <div className="kpiLabel">Run ID</div>
                     <div className="kpiVal mono">{resp.run_id}</div>
@@ -241,7 +319,7 @@ export default function App() {
                 </div>
 
                 <div className="explain">
-                  <div className="explainTitle">Explainability</div>
+                  <div className="explainTitle">Explainability (API)</div>
                   <ul>
                     {resp.explain?.map((x, i) => (
                       <li key={i}>{x}</li>
@@ -250,12 +328,10 @@ export default function App() {
                 </div>
 
                 <div className="embedNote">
-                
                   Audit-safe output: every run generates a unique <span className="mono">Run ID</span> for traceability.
-
                 </div>
-                <ValueProposition fleetSize={fleetSize} defaultCurrency="RM" />
 
+                <ValueProposition fleetSize={fleetSize} currency={currency} onCurrencyChange={setCurrency} />
               </>
             )}
           </div>

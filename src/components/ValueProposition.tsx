@@ -3,35 +3,22 @@ import InfoTip from "./InfoTip";
 
 type Props = {
   fleetSize: number;
-  defaultCurrency?: string;
+  currency: "RM" | "USD" | "AED" | "SAR";
+  onCurrencyChange: (c: "RM" | "USD" | "AED" | "SAR") => void;
 };
-
-type Currency = { code: string; symbol: string };
-
-const CURRENCIES: Currency[] = [
-  { code: "RM", symbol: "RM" },
-  { code: "SAR", symbol: "SAR" },
-  { code: "USD", symbol: "$" },
-  { code: "AED", symbol: "AED" },
-];
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function fmtMoney(n: number, symbol: string) {
+function fmtMoney(n: number, code: string) {
   const safe = Number.isFinite(n) ? n : 0;
-  return `${symbol} ${Math.round(safe).toLocaleString()}`;
+  return `${code} ${Math.round(safe).toLocaleString()}`;
 }
 
-export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: Props) {
-  // View
+export default function ValueProposition({ fleetSize, currency, onCurrencyChange }: Props) {
   const [open, setOpen] = useState(false);
   const [showMonthly, setShowMonthly] = useState(false);
-
-  // Currency
-  const [currency, setCurrency] = useState(defaultCurrency);
-  const cur = useMemo(() => CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0], [currency]);
 
   // Assumptions (demo-safe defaults; editable)
   const [annualKm, setAnnualKm] = useState(120000);
@@ -62,7 +49,7 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
     const fCost = Math.max(0, Number(fuelCost) || 0);
     const fuelPerVeh = (km / 100) * Math.max(0, fBefore - fAfter) * fCost;
 
-    // Brakes: sets/year before - sets/year after, * cost
+    // Brakes
     const bBefore = Math.max(1, Number(brakeBeforeKm) || 1);
     const bAfter = Math.max(1, Number(brakeAfterKm) || 1);
     const bCost = Math.max(0, Number(brakeCostSet) || 0);
@@ -74,34 +61,15 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
     const tCost = Math.max(0, Number(tyreCostSet) || 0);
     const tyrePerVeh = Math.max(0, km / tBefore - km / tAfter) * tCost;
 
-    const perVehAnnual = {
-      fuel: fuelPerVeh,
-      brakes: brakePerVeh,
-      tyres: tyrePerVeh,
-      total: fuelPerVeh + brakePerVeh + tyrePerVeh,
-    };
-
     const fleetAnnual = {
-      fuel: perVehAnnual.fuel * safeFleet,
-      brakes: perVehAnnual.brakes * safeFleet,
-      tyres: perVehAnnual.tyres * safeFleet,
-      total: perVehAnnual.total * safeFleet,
+      fuel: fuelPerVeh * safeFleet,
+      brakes: brakePerVeh * safeFleet,
+      tyres: tyrePerVeh * safeFleet,
+      total: (fuelPerVeh + brakePerVeh + tyrePerVeh) * safeFleet,
     };
 
-    return { perVehAnnual, fleetAnnual };
-  }, [
-    annualKm,
-    fuelBefore,
-    fuelAfter,
-    fuelCost,
-    brakeBeforeKm,
-    brakeAfterKm,
-    brakeCostSet,
-    tyreBeforeKm,
-    tyreAfterKm,
-    tyreCostSet,
-    safeFleet,
-  ]);
+    return { fleetAnnual };
+  }, [annualKm, fuelBefore, fuelAfter, fuelCost, brakeBeforeKm, brakeAfterKm, brakeCostSet, tyreBeforeKm, tyreAfterKm, tyreCostSet, safeFleet]);
 
   const divisor = showMonthly ? 12 : 1;
   const periodLabel = showMonthly ? "Monthly" : "Annual";
@@ -117,7 +85,7 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
         <div className="vpHeaderLeft">
           <div className="vpTitle">Value Proposition (optional)</div>
           <div className="vpSub">
-            Total {periodLabel} Savings (fleet): <span className="vpStrong">{fmtMoney(fleetTotal, cur.symbol)}</span>
+            Total {periodLabel} Savings (fleet): <span className="vpStrong">{fmtMoney(fleetTotal, currency)}</span>
           </div>
         </div>
         <div className="vpChevron">{open ? "▾" : "▸"}</div>
@@ -132,20 +100,19 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
             Monthly
           </button>
           <div className="vpNote">
-            <InfoTip text="This section estimates savings drivers (Fuel, Brakes, Tyres). Defaults are editable assumptions and demo-safe." />
+            <InfoTip text="Directional driver estimates (Fuel, Brakes, Tyres). Defaults are editable assumptions and demo-safe." />
           </div>
         </div>
 
         <div className="vpCurrency">
           <label className="vpLabel">
-            Currency <InfoTip text="Display only. Does not affect the FPI API response currency." />
+            Currency <InfoTip text="Currently display-only. Phase 2: convert via backend-cached FX (/v1/fx/latest)." />
           </label>
-          <select className="vpSelect" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-            {CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code}
-              </option>
-            ))}
+          <select className="vpSelect" value={currency} onChange={(e) => onCurrencyChange(e.target.value as any)}>
+            <option value="RM">RM</option>
+            <option value="USD">USD</option>
+            <option value="AED">AED</option>
+            <option value="SAR">SAR</option>
           </select>
         </div>
       </div>
@@ -155,25 +122,25 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
           <div className="vpGrid">
             <div className="vpItem">
               <div className="vpItemTitle">Fuel</div>
-              <div className="vpItemVal">{fmtMoney(fleetFuel, cur.symbol)}</div>
+              <div className="vpItemVal">{fmtMoney(fleetFuel, currency)}</div>
               <div className="vpItemSub">{periodLabel} fleet savings</div>
             </div>
 
             <div className="vpItem">
               <div className="vpItemTitle">Brakes</div>
-              <div className="vpItemVal">{fmtMoney(fleetBrakes, cur.symbol)}</div>
+              <div className="vpItemVal">{fmtMoney(fleetBrakes, currency)}</div>
               <div className="vpItemSub">{periodLabel} fleet savings</div>
             </div>
 
             <div className="vpItem">
               <div className="vpItemTitle">Tyres</div>
-              <div className="vpItemVal">{fmtMoney(fleetTyres, cur.symbol)}</div>
+              <div className="vpItemVal">{fmtMoney(fleetTyres, currency)}</div>
               <div className="vpItemSub">{periodLabel} fleet savings</div>
             </div>
 
             <div className="vpItem vpTotal">
               <div className="vpItemTitle">Total</div>
-              <div className="vpItemVal">{fmtMoney(fleetTotal, cur.symbol)}</div>
+              <div className="vpItemVal">{fmtMoney(fleetTotal, currency)}</div>
               <div className="vpItemSub">{periodLabel} fleet savings</div>
             </div>
           </div>
@@ -192,7 +159,6 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
               <div className="vpSplit">
                 <div className="vpBlock">
                   <div className="vpBlockTitle">Fuel</div>
-
                   <div className="vpInputGrid">
                     <div className="vpInputRow">
                       <label className="vpLabel">Before (L/100km)</label>
@@ -211,7 +177,6 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
 
                 <div className="vpBlock">
                   <div className="vpBlockTitle">Brakes</div>
-
                   <div className="vpInputGrid">
                     <div className="vpInputRow">
                       <label className="vpLabel">Before frequency (km)</label>
@@ -230,7 +195,6 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
 
                 <div className="vpBlock">
                   <div className="vpBlockTitle">Tyres</div>
-
                   <div className="vpInputGrid">
                     <div className="vpInputRow">
                       <label className="vpLabel">Before frequency (km)</label>
@@ -249,8 +213,7 @@ export default function ValueProposition({ fleetSize, defaultCurrency = "RM" }: 
               </div>
 
               <div className="vpFinePrint">
-                These are directional estimates for demo conversations. We can calibrate with customer fleet data (actual km, consumption,
-                maintenance intervals, and cost structures).
+                Directional estimates for demo conversations. Calibrate with customer fleet data (actual km, consumption, maintenance intervals, and cost structures).
               </div>
             </div>
           </details>

@@ -572,6 +572,22 @@ input[type="number"] {
   outline: none;
 }
 
+.vpSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.92);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+.vpSelect option {
+  background: #0b0c11;
+  color: rgba(255,255,255,0.92);
+}
+
+
 .vpBody { margin-top: 12px; }
 
 .vpGrid {
@@ -645,3 +661,21 @@ input[type="number"] {
   .vpGrid { grid-template-columns: 1fr; }
   .vpInputGrid { grid-template-columns: 1fr; }
 }
+
+/* Small toggle pills inside KPI label */
+.miniPill { padding: 6px 10px; font-size: 12px; }
+.kpiLabelRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.kpiToggles { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.kpiMetaRow { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.kpiMeta { opacity: 0.75; font-size: 12.5px; }
+
+/* Revenue assumption details */
+.assumpDetails {
+  margin-top: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  padding: 10px 12px;
+}
+.assumpSummary { cursor: pointer; font-weight: 700; opacity: 0.9; }
